@@ -10,7 +10,7 @@ WINDOW_SIZE = (WINDOW_W, WINDOW_H)
 
 # צבע
 BLACK = (0, 0, 0)
-PINK = (253, 57, 72)
+WHITE = (250, 250, 250)
 
 # ריבועים
 square1_y = WINDOW_H/2
@@ -110,10 +110,10 @@ while play:
     screen.fill(BLACK)
     
     #הניקוד של שני השחקנים
-    font = pygame.font.SysFont(None, 50)
-    img1 = font.render('score:' + str(count1), True, PINK)
+    font = pygame.font.SysFont(None, 45)
+    img1 = font.render('score:' + str(count1), True, WHITE)
     screen.blit(img1, (130,40 ))
-    img2 = font.render('score:' + str(count2), True, PINK)
+    img2 = font.render('score:' + str(count2), True, WHITE)
     screen.blit(img2, (530,40 ))
     
 
