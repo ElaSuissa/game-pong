@@ -2,6 +2,22 @@ from itertools import count
 import pygame
 import time
 from pickle import TRUE
+import cv2
+import mediapipe as mp
+
+# define a video capture object
+vid = cv2.VideoCapture(0)
+
+
+mp_Hands = mp.solutions.hands
+hands = mp_Hands.Hands(max_num_hands=2,min_detection_confidence=0.9)
+mpDraw = mp.solutions.drawing_utils
+
+index_finger_y_player1 = 0
+index_finger_y_player2 = 0
+
+
+
 
 # גודל של המסך
 WINDOW_W = 800
@@ -29,6 +45,9 @@ pygame.init()
 screen = pygame.display.set_mode(WINDOW_SIZE)
 pygame.display.set_caption("pong")
 
+
+    
+
 #פונקציות שבודקות אם הכדור פגע במלבן של השחקנים 
 def is_circle_hit_player1 (circle_x, circle_y,square1_y):
      return abs (circle_x - 10) < 30 and abs (circle_y - square1_y ) < 30
@@ -37,8 +56,8 @@ def is_circle_hit_player2 (circle_y,circle_x, square2_y):
     return abs (circle_y - square2_y)< 30 and abs ( 800-15 - circle_x)< 30
     
 
-hold_player_1 = 0
-hold_player_2 = 0
+# hold_player_1 = 0
+# hold_player_2 = 0
 
 clock = pygame.time.Clock()
 
@@ -48,22 +67,21 @@ while play:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             play = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_w:
-                hold_player_1 = -1
-            elif event.key == pygame.K_s:
-                hold_player_1 = 1
-            if event.key == pygame.K_UP:
-                hold_player_2 = -1
-            elif event.key == pygame.K_DOWN:
-                hold_player_2 = 1
-        elif event.type == pygame.KEYUP:
-            hold_player_1 = 0
-            hold_player_2 = 0
-    square1_y += 20 * hold_player_1   
-    square2_y += 20 * hold_player_2
-
-
+    #     elif event.type == pygame.KEYDOWN:
+    #         if event.key == pygame.K_w:
+    #             hold_player_1 = -1
+    #         elif event.key == pygame.K_s:
+    #             hold_player_1 = 1
+    #         if event.key == pygame.K_UP:
+    #             hold_player_2 = -1
+    #         elif event.key == pygame.K_DOWN:
+    #             hold_player_2 = 1
+    #     elif event.type == pygame.KEYUP:
+    #         hold_player_1 = 0
+    #         hold_player_2 = 0
+    # # square1_y += 20 * hold_player_1   
+    # # square2_y += 20 * hold_player_2
+    
 #בודק אם הכדור פגע במלבן של השחקן הראשון ומוסיף לו נקודה
     if is_circle_hit_player1 (circle_x, circle_y,square1_y):
         hit = True
@@ -80,9 +98,9 @@ while play:
 
     #החזרה של הכדור כשהוא פוגע בריבוע
     if not hit:
-        circle_x -= 10
+        circle_x -= 7
     elif hit:
-        circle_x += 10
+        circle_x += 7
        
     #גבולות של הכדור
     if circle_y <= 0:
@@ -95,20 +113,74 @@ while play:
     elif limit_y == False:
         circle_y -= 3    
     
-    #גבולות של המרובעים
-    if square1_y - 45  <= 0:
-        hold_player_1  = 0
-    elif square1_y  + 45 >= WINDOW_H:
-        hold_player_1= 0
-    
-    if square2_y - 45 <= 0:
-        hold_player_2 = 0
-    elif square2_y + 45 >= WINDOW_H:
-        hold_player_2 = 0
-    
-
     screen.fill(BLACK)
+
+    #while (True):
+        # Capture the video frame
+        # by frame
+    ret, frame = vid.read()
+    max_num_hands=2
+    RGB_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+    results = hands.process(RGB_image)
+    multiLandMarks = results.multi_hand_landmarks
+    if multiLandMarks:
+        print ("len(multiLandMarks)", len(multiLandMarks))
+    else:
+        print ("len(multiLandMarks) 0")
+    if multiLandMarks and len(multiLandMarks)==2:
+            # go over all hands found and draw them on the BGR image
+        for handLms in multiLandMarks:
+            mpDraw.draw_landmarks(frame, handLms, mp_Hands.HAND_CONNECTIONS)
+            
+            # the location of the index finger tip is number 8 in the landmarks
+        index_finger8_y_player1 = multiLandMarks[0].landmark[8].y
+        index_finger5_y_player1 = multiLandMarks[0].landmark[5].y
+        index_finger8_x_player1 = multiLandMarks[0].landmark[8].x
+        index_finger5_x_player1 = multiLandMarks[0].landmark[5].x    
+        
+        print("player1= ",index_finger8_x_player1)
+
+        index_finger8_y_player2 = multiLandMarks[1].landmark[8].y
+        index_finger5_y_player2 = multiLandMarks[1].landmark[5].y
+        index_finger8_x_player2 = multiLandMarks[1].landmark[8].x
+        index_finger5_x_player2 = multiLandMarks[1].landmark[5].x
+        print("player2= ",index_finger8_x_player2)
+
+        hold_player_1 = 0
+        hold_player_2 = 0
+        if (index_finger8_x_player1 < 0.5 or index_finger5_x_player1 < 0.5) and (index_finger8_x_player1 > 0 or index_finger5_x_player1) > 0:
+            if index_finger8_y_player1 < index_finger5_y_player1:
+                # print ("finger1 =up")
+                hold_player_1 = 1
+            else:
+                # print ("finger1 =down")
+                hold_player_1 = -1
+        if index_finger8_x_player2 > 0.5 or index_finger5_x_player2 > 0.5 and index_finger8_x_player2 < 1 or index_finger5_x_player2 < 1:
+            if index_finger8_y_player2 < index_finger5_y_player2:
+                # print ("finger2 =up")
+                hold_player_2 = -1
+            else:
+                # print ("finger2 =down")
+                hold_player_2 = 1
+            
+
+        #גבולות של המרובעים
+        if square1_y - 45  <= 0:
+           hold_player_1  = 0
+        elif square1_y  + 45 >= WINDOW_H:
+           hold_player_1= 0
+        
+        if square2_y - 45 <= 0:
+            hold_player_2 = 0
+        elif square2_y + 45 >= WINDOW_H:
+            hold_player_2 = 0
+        
+        print (hold_player_2)
+        square1_y += 20 * hold_player_1   
+        square2_y += 20 * hold_player_2
     
+    #cv2.imshow("hands",frame)
     #הניקוד של שני השחקנים
     font = pygame.font.SysFont(None, 45)
     img1 = font.render('score:' + str(count1), True, WHITE)
