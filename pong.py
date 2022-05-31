@@ -165,16 +165,16 @@ while play:
                 hold_player_2 = 1
             
 
-        #גבולות של המרובעים
-        if square1_y - 45  <= 0:
-           hold_player_1  = 0
-        elif square1_y  + 45 >= WINDOW_H:
-           hold_player_1= 0
+        # #גבולות של המרובעים
+        # if square1_y - 45  <= 0:
+        #    hold_player_1  = 0
+        # elif square1_y  + 45 >= WINDOW_H:
+        #    hold_player_1= 0
         
-        if square2_y - 45 <= 0:
-            hold_player_2 = 0
-        elif square2_y + 45 >= WINDOW_H:
-            hold_player_2 = 0
+        # if square2_y - 45 <= 0:
+        #     hold_player_2 = 0
+        # elif square2_y + 45 >= WINDOW_H:
+        #     hold_player_2 = 0
         
         print (hold_player_2)
         square1_y += 20 * hold_player_1   
