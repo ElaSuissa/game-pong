@@ -37,6 +37,7 @@ square2_y = WINDOW_H/2
 circle_x = WINDOW_W/2
 circle_y = WINDOW_H/2
 
+
 hit = True
 limit_y = True
 count1 = 0
@@ -49,11 +50,11 @@ pygame.display.set_caption("pong")
 
 #פונקציות שבודקות אם הכדור פגע במלבן של השחקנים 
 def is_circle_hit_player1 (circle_x, circle_y,square1_y):
-     return abs (circle_x - 10) < 30 and (circle_y - square1_y ) < 30
+    return abs (circle_x - 10) < 30 and (circle_y - square1_y ) < 30
 
 
 def is_circle_hit_player2 (circle_y,circle_x, square2_y):
-    return (circle_y - square2_y)< 30 and abs ( 800-15 - circle_x)< 30
+    return abs (circle_y - square2_y)< 30 and abs ( 800-15 - circle_x)< 30
 
 #פונקציה שבודקת אם הכדור יצא מהמשחק והשחקן הפסיד
 def if_lose (circle_x):
@@ -64,7 +65,6 @@ hold_player_2 = 0
 
 
 LOSE_IMAGE = pygame.image.load("lose pic.png")
-# LOSE_IMAGE = pygame.transform.scale(LOSE_IMAGE, (10, 20)) 
 
 
 clock = pygame.time.Clock()
@@ -87,7 +87,6 @@ while play:
 
 
 #קורא את התמונה 
-
     ret, frame = vid.read()
     max_num_hands=1
     
@@ -96,14 +95,15 @@ while play:
 
 #מחפש ידיים בתמונה
     results = hands.process(RGB_image)
+    # לוקח רשימה של הפרטים על הידיים שהוא מצא
     multiLandMarks = results.multi_hand_landmarks
     
     
-    # אם הוא מוצא ידיים, הוא עובר לך היידים ומצייר אותם 
+    # אם הוא מוצא ידיים, הוא עובר על היידים ומצייר אותם 
     if multiLandMarks and len(multiLandMarks)==1:
-        for handLms in multiLandMarks:
-            mpDraw.draw_landmarks(frame, handLms, mp_Hands.HAND_CONNECTIONS)
-            
+        # for handLms in multiLandMarks:
+         # mpDraw.draw_landmarks(frame, handLms, mp_Hands.HAND_CONNECTIONS)
+
  #מיקום הנקודות שעל היד
         index_finger8_y_player2 = multiLandMarks[0].landmark[8].y
         index_finger5_y_player2 = multiLandMarks[0].landmark[5].y
@@ -122,7 +122,7 @@ while play:
             square2_y -= 10
             
         if (index_finger8_y_player2 > index_finger5_y_player2) and square2_y <= WINDOW_H -30 and (index_finger12_y_player2 > index_finger9_y_player2):
-        # print ("finger1 =down")
+            # print ("finger1 = down")
             # hold_player_2 = 1
             square2_y += 10
         
@@ -134,18 +134,18 @@ while play:
         hit = True
         print("hit player 1")
         count1 +=1
-        count1 +=1 
 
 
- #הבודק אם הכדור פגע במלבן של השחקן השני ומוסיף לו נקודה
+
+ #בודק אם הכדור פגע במלבן של השחקן השני ומוסיף לו נקודה
     if is_circle_hit_player2 (circle_y,circle_x, square2_y):
         hit = False
         print ("hit player 2")
         count2 +=1
-    #צעדים של הכדור שהוא פוגע בריבוע וחוזר
+    
 
 
-    #החזרה של הכדור כשהוא פוגע בריבוע
+    # (מהירות הכדור) החזרה של הכדור כשהוא פוגע בריבוע
     if not hit:
         circle_x -= 10
     elif hit:
@@ -165,12 +165,6 @@ while play:
         circle_y -= 3
         square1_y -= 3    
 
-    #גבולות של המרובעים
-    if square1_y - 45  <= 0:
-        hold_player_1  = 0
-    elif square1_y  + 45 >= WINDOW_H:
-        hold_player_1= 0
-
 
     if square2_y - 45 <= 0:
         hold_player_2 = 0
@@ -180,24 +174,29 @@ while play:
         
     screen.fill(WHITE)
 
-    
+    #מציג תמונה של "הפסדת" אחרי שהפונקציה בדקה שהפסדת 
     if if_lose (circle_x):
         screen.blit(LOSE_IMAGE, (160,200))
-            
-
-    # מצייר את הקווים,הריבועים והכדור
+                
+    #  מצייר את הקווים במסגרת ובאמצע
     pygame.draw.line(screen, (0, 0, 0), (0, 0), (0, WINDOW_H), 5)
     pygame.draw.line(screen, (0, 0, 0), (0, WINDOW_H), (WINDOW_W, WINDOW_H), 5)
     pygame.draw.line(screen, (0, 0, 0), (WINDOW_W, WINDOW_H), (WINDOW_W, 0), 5)
     pygame.draw.line(screen, (0, 0, 0), (WINDOW_W, 0), (0, 0), 5)
     pygame.draw.line(screen, (0, 0, 0), (400, 0), (400, 664), 5)
+    
+    # מצייר את הריבועים של השחקנים
     pygame.draw.line(screen, (PINK), (800-15, square2_y+30), (800-15, square2_y-30), 10)
     pygame.draw.line(screen, (PINK), (10, square1_y+30), (10, square1_y-30), 10)
+    
+    # מצייר את הכדור
     pygame.draw.circle(screen, (PINK), (circle_x, circle_y), 15)
+    
     font = pygame.font.SysFont(None, 50)
+    
     #ניקוד
-    img2 = font.render('score:' + str(count2), True, PINK) 
-    screen.blit(img2, (350,50 ))
+    img = font.render('score:' + str(count2), True, PINK) 
+    screen.blit(img, (350,50 ))
     pygame.display.flip()
-    clock.tick(25)
+    clock.tick(253)
 pygame.display.update()
